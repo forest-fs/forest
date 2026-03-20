@@ -16,9 +16,9 @@ Simplicity: shared memory for the ingest queue, one config load, one database po
 
 Auto-onboarding is best-effort and logged. An admin can run **`/forest init`** after fixing permissions, OpenRouter, or database issues.
 
-## Why flat `/forest files` instead of a tree UI?
+## Why a markdown list for `/forest files` instead of an interactive tree UI?
 
-Discord interaction constraints and MVP scope favor a **paginated list** that is easy to implement and maintain. Hierarchical navigation can return as a post-MVP UX.
+`/forest files` renders a **nested bullet list** (Markdown: indented `-` lines, bold folder names, `[filename](url)` for files) so Discord can **linkify** URLs. It stays **paginated** by line for message limits. A clickable hierarchical navigator is out of MVP scope.
 
 ## Can I run without Docker?
 

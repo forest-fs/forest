@@ -21,7 +21,7 @@ Bot permissions should include, at minimum:
 | `/forest help` | Any member | Ephemeral summary of commands, ingest behavior, and admin vs user actions. |
 | `/forest init` | Members with **Manage Server** | Scans **all readable** text channels and **active forum threads** (full message history via the API), builds capped transcripts, then runs onboarding: upserts a `Workspace`, LLM folder tree, directory `FileNode` rows, `is_initialized`. Skips if already initialized (use `update` to re-merge). Large servers rely on **char budgets** (see env below). |
 | `/forest update` | Members with **Manage Server** | **After** init: same history scan + LLM again; **merges** new folder paths (`ensure_path`). Does not delete nodes or re-enqueue ingest for old messages; re-send attachments/links if you need those stored again. |
-| `/forest files` | Any member allowed by your server policy | Lists **file** nodes in a **flat** list with paths and links, paginated (`page` argument). No hierarchical picker in MVP. |
+| `/forest files` | Any member allowed by your server policy | Shows **file** nodes as a **nested markdown bullet list** (bold `**/folder/**`, `[filename](url)` on files), paginated by line (`page` argument). No interactive picker in MVP. |
 
 On **guild join**, the bot attempts the same onboarding as `/forest init` (best effort; failures are logged).
 
