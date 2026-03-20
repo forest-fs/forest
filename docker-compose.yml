@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: forest
+      POSTGRES_PASSWORD: forest
+      POSTGRES_DB: forest
+    ports:
+      - "5432:5432"
+    volumes:
+      - forest_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forest -d forest"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  forest:
+    build: .
+    env_file:
+      - .env
+    environment:
+      # Hostname is the Compose service name (overrides localhost in .env when both are used).
+      DATABASE_URL: postgresql+asyncpg://forest:forest@postgres:5432/forest
+    ports:
+      - "${FOREST_HTTP_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  forest_pg_data:
