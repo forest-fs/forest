@@ -56,7 +56,7 @@ Slash commands:
 - `/forest help` — short overview (anyone).
 - `/forest init` — scans readable channels (full message history, subject to transcript size limits in settings) and seeds the virtual tree (requires Manage Server). Also runs automatically when the bot joins a guild.
 - `/forest update` — same scan + re-merge new directories (recovery / layout refresh); does not replay ingest jobs for old messages.
-- `/forest files` — flat paginated list of captured files with paths and links.
+- `/forest files` — paginated **nested markdown list** of captured files (bold folders, files as `[name](url)` links).
 
 Optional `DISCORD_SYNC_GUILD_ID` in `.env` speeds up slash command sync while developing.
 

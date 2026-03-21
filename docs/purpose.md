@@ -21,7 +21,7 @@ In scope:
 
 - Discord bot with passive `on_message` ingest (attachments + HTTP(S) URLs).
 - Onboarding: seed directory tree from channel names (LLM) on guild join or `/forest init`.
-- Browse: flat, paginated `/forest files` (no interactive tree UI).
+- Browse: paginated `/forest files` as a nested markdown list (no interactive tree UI).
 - OpenRouter-only LLM access (OpenAI-compatible HTTP).
 - PostgreSQL with **pgvector**, FastAPI **healthz** / **ready**, stdlib logging.
 

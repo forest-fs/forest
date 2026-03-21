@@ -1,7 +1,8 @@
 """
 Discord application: slash commands, passive message ingest queue, command sync.
 
-Implements ``/forest help``, ``/forest init``, ``/forest update``, and ``/forest files``; ingest runs in
+Implements ``/forest help``, ``/forest init``, ``/forest update``, and ``/forest files``
+(listing); ingest runs in
 a background worker with per-guild concurrency limits.
 """
 
@@ -21,6 +22,7 @@ from forest.platforms.discord.history_scan import collect_channel_histories_for_
 from forest.platforms.discord.payloads import build_ingest_payload
 from forest.repositories.file_node_repo import FileNodeRepository
 from forest.repositories.workspace_repo import WorkspaceRepository
+from forest.services.file_tree import file_nodes_to_tree_lines
 from forest.services.ingest import process_ingest
 from forest.services.llm.service import LLMService
 from forest.services.onboarding import run_onboarding_for_workspace
@@ -35,7 +37,7 @@ _FOREST_HELP_TEXT = (
     "• `/forest help` — this overview\n"
     "• `/forest init` — **Manage Server**: scan readable channels (full message history) and seed the folder tree via the LLM (once per server unless you use `update`)\n"
     "• `/forest update` — **Manage Server**: same scan + re-merge new folders (keeps existing files)\n"
-    "• `/forest files` — list captured files (optional `page`)\n\n"
+    "• `/forest files` — captured files as a nested markdown list (optional `page`)\n\n"
     "**Ingest** — After init, normal messages that include attachments or `http(s)` URLs may be stored. "
     "Forest does not replay old messages; resend content if an ingest failed.\n\n"
     "Full detail for operators is in the Forest repo (**README** and **docs/usage.md**)."
@@ -168,23 +170,25 @@ async def forest_update(interaction: discord.Interaction) -> None:
     )
 
 
-@forest_group.command(name="files", description="List captured files (flat, paginated)")
+@forest_group.command(
+    name="files", description="Captured files as nested bullets (paginated by line)"
+)
 @app_commands.describe(page="Page number (starts at 1)")
 async def forest_files(interaction: discord.Interaction, page: int = 1) -> None:
     """
-    Slash: list all stored file leaves as plain lines (path + link), paginated.
+    Slash: show stored file leaves as a nested markdown list, paginated.
 
     Parameters
     ----------
     interaction : discord.Interaction
         Guild interaction required.
     page : int, optional
-        1-based page index; clamped to valid range.
+        1-based page index over tree lines; clamped to valid range.
 
     Notes
     -----
     Output is truncated to stay within Discord message size limits. No interactive
-    tree UI in MVP.
+    tree picker in MVP.
     """
     await interaction.response.defer(ephemeral=True)
     if interaction.guild is None:
@@ -192,7 +196,7 @@ async def forest_files(interaction: discord.Interaction, page: int = 1) -> None:
         return
     if page < 1:
         page = 1
-    page_size = 15
+    page_size = 20
     async with session_scope() as session:
         ws_repo = WorkspaceRepository(session)
         files_repo = FileNodeRepository(session)
@@ -206,21 +210,31 @@ async def forest_files(interaction: discord.Interaction, page: int = 1) -> None:
     if not nodes:
         await interaction.followup.send("No files captured yet.")
         return
-    lines: list[str] = []
-    for n in nodes:
-        link = n.source_url or n.message_url or ""
-        line = f"`{n.full_path}` — {link}" if link else f"`{n.full_path}`"
-        lines.append(line[:350])
+    lines = [
+        ln[:500] + ("…" if len(ln) > 500 else "")
+        for ln in file_nodes_to_tree_lines(nodes, discord_markdown_links=True)
+    ]
     total_pages = max(1, (len(lines) + page_size - 1) // page_size)
     if page > total_pages:
         page = total_pages
     start = (page - 1) * page_size
     chunk = lines[start : start + page_size]
     body = "\n".join(chunk)
-    header = f"Page {page} of {total_pages} — {len(nodes)} file(s)\n\n"
-    text = header + body
-    if len(text) > 3900:
-        text = text[:3890] + "\n…"
+    intro = "Here's your workspace knowledge until now, organized by forest:"
+    outro = "Your knowledge will be organized by forest as you continue to share files."
+    header = f"Page {page} of {total_pages} — {len(nodes)} file(s)\n"
+    prefix = f"{intro}\n\n{header}"
+    suffix = f"\n\n{outro}"
+    max_len = 3900
+    mid_budget = max_len - len(prefix) - len(suffix)
+    if len(body) <= mid_budget:
+        text = prefix + body + suffix
+    elif mid_budget <= 0:
+        text = (prefix + suffix)[: max_len - 1] + "…"
+    elif mid_budget == 1:
+        text = prefix + "…" + suffix
+    else:
+        text = prefix + body[: mid_budget - 1].rstrip() + "…" + suffix
     await interaction.followup.send(text)
 
 
