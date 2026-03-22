@@ -31,6 +31,10 @@ Find any file by context with `/forest find`.
 ## Self Hosting
 For full privacy, we let _you_ host it, it's simple to set up, just follow the steps below.
 
+
+----
+_this section is out dated until we figure out the self hosting story_
+
 ### Requirements
 
 - Python 3.11+
