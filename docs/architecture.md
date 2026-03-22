@@ -21,11 +21,11 @@ flowchart LR
         Repos --> Models["models/"]
     end
 
-    LLM --> OpenRouter["OpenRouter"]
+    LLM --> LLMHttp["OpenAI-compatible API<br/>(default: OpenRouter)"]
 
     subgraph LLMAPIs["LLM APIs"]
-        OpenRouter --> ChatModel["Chat completion<br/>(e.g. GPT-4o, Claude)"]
-        OpenRouter --> EmbedModel["Embeddings<br/>(e.g. text-embedding-3-small)"]
+        LLMHttp --> ChatModel["Chat completion"]
+        LLMHttp --> EmbedModel["Embeddings<br/>(dim must match DB)"]
     end
 
     Models --> DB[(PostgreSQL + pgvector)]
@@ -57,7 +57,7 @@ Routing failures fall back to `/Inbox` with a generic summary (logged).
 
 ## LLM boundary
 
-All chat and embedding calls go through **`LLMService`**, configured for **OpenRouter** only (`base_url` + model ids).
+All chat and embedding calls go through **`LLMService`**, using an **OpenAI-shaped** HTTP API (`AsyncOpenAI` + `base_url`). **Default:** **OpenRouter** (`LLM_BASE_URL` = `https://openrouter.ai/api/v1`). **Alternatively:** point **`LLM_BASE_URL`** at another OpenAI-compatible service (direct OpenAI, Azure OpenAI, Ollama, …). See **[LLM configuration](llm-configuration.md)**.
 
 ## Observability
 

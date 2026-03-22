@@ -10,8 +10,10 @@ Create Date: 2025-03-20
 
 Notes
 -----
-Embedding dimension ``1536`` must stay aligned with ``EMBEDDING_MODEL_ID`` and the
-SQLAlchemy model; changing it requires a new migration and optional data backfill.
+Embedding column is ``vector(768)`` — a compact default (see ``EMBEDDING_VECTOR_DIMENSIONS``
+in ``forest/models/file_node.py``). The app sends ``dimensions=768`` on embedding API
+requests for models that support it (e.g. OpenAI ``text-embedding-3-small``). Changing
+``N`` requires a new migration and optional re-embedding.
 """
 
 from typing import Sequence, Union
@@ -65,7 +67,7 @@ def upgrade() -> None:
         sa.Column("source_url", sa.Text(), nullable=True),
         sa.Column("message_url", sa.Text(), nullable=True),
         sa.Column("summary", sa.Text(), nullable=True),
-        sa.Column("embedding", Vector(1536), nullable=True),
+        sa.Column("embedding", Vector(768), nullable=True),
         sa.Column("external_key", sa.String(length=128), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),

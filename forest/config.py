@@ -2,13 +2,16 @@
 Runtime configuration loaded from environment (and optional ``.env``).
 
 Secrets must never be committed; use ``.env`` locally (gitignored) or injected
-secrets in production. The LLM path is **OpenRouter only** (OpenAI-compatible
-HTTP via the ``openai`` SDK with ``base_url``).
+secrets in production. LLM calls use an **OpenAI-shaped** HTTP API
+(``openai.AsyncOpenAI`` with ``base_url``). **Default:** OpenRouter
+(``LLM_BASE_URL`` → ``https://openrouter.ai/api/v1``). **Alternatively:** point
+``LLM_BASE_URL`` at any other OpenAI-compatible service (direct OpenAI, Azure,
+Ollama, …) — see ``docs/llm-configuration.md``.
 """
 
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,9 +23,10 @@ class Settings(BaseSettings):
 
     Notes
     -----
-    ``OPENROUTER_API_KEY``, ``CHAT_MODEL_ID``, and ``EMBEDDING_MODEL_ID`` are required
-    at runtime. The embedding vector dimension in the database must match the
-    configured ``EMBEDDING_MODEL_ID`` output (see models and README).
+    ``LLM_API_KEY`` (or legacy ``OPENROUTER_API_KEY``), ``CHAT_MODEL_ID``, and
+    ``EMBEDDING_MODEL_ID`` are required at runtime. The embedding vector dimension
+    in the database must match the configured ``EMBEDDING_MODEL_ID`` output (see
+    ``docs/llm-configuration.md`` and ``EMBEDDING_VECTOR_DIMENSIONS``).
     """
 
     model_config = SettingsConfigDict(
@@ -41,18 +45,25 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", validation_alias="HOST")
     port: int = Field(default=8000, validation_alias="PORT")
 
-    openrouter_api_key: SecretStr = Field(..., validation_alias="OPENROUTER_API_KEY")
+    openrouter_api_key: SecretStr = Field(
+        ...,
+        validation_alias=AliasChoices("LLM_API_KEY", "OPENROUTER_API_KEY"),
+        description="API key for the OpenAI-compatible LLM endpoint (OpenRouter by default).",
+    )
     openrouter_base_url: str = Field(
         default="https://openrouter.ai/api/v1",
-        validation_alias="OPENROUTER_BASE_URL",
+        validation_alias=AliasChoices("LLM_BASE_URL", "OPENROUTER_BASE_URL"),
+        description="Base URL for chat and embedding APIs (OpenRouter, OpenAI, Azure, Ollama, …).",
     )
     openrouter_http_referer: str | None = Field(
         default=None,
-        validation_alias="OPENROUTER_HTTP_REFERER",
+        validation_alias=AliasChoices("LLM_HTTP_REFERER", "OPENROUTER_HTTP_REFERER"),
+        description="Optional Referer header (OpenRouter attribution).",
     )
     openrouter_app_name: str | None = Field(
         default=None,
-        validation_alias="OPENROUTER_APP_NAME",
+        validation_alias=AliasChoices("LLM_APP_NAME", "OPENROUTER_APP_NAME"),
+        description="Optional X-Title header (OpenRouter attribution).",
     )
 
     chat_model_id: str = Field(..., validation_alias="CHAT_MODEL_ID")

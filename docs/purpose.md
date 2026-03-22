@@ -17,7 +17,7 @@ Currently supported:
 
 - `森 forest` only supports Slack for now, but future chat applications will be supported if there's enough interest.
 - On initialization, `森 forest` scans all conversations and files and builds an initial filesystem, no matter how old or big the history is.
-- By using OpenRouter, `森 forest` lets _you_ provide your LLM of choice to work with.
+- By using an **OpenAI-compatible** LLM API (OpenRouter by default), `森 forest` lets _you_ provide your model of choice; see [LLM configuration](llm-configuration.md).
 
 Future work:
 

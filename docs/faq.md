@@ -1,8 +1,8 @@
 # FAQ
 
-## Why OpenRouter only?
+## Why OpenRouter as the default?
 
-The MVP standardizes on one OpenAI-compatible HTTP surface with a single API key and model slugs. Vendor-specific SDKs are avoided so routing and policy stay centralized. You can still target many models **through** OpenRouter.
+The app uses **one** HTTP client for an **OpenAI-shaped** API (`AsyncOpenAI` + `base_url`). **Default:** **`LLM_BASE_URL`** is **OpenRouter** (one key, model slugs like `openai/...`). **Alternatively:** point **`LLM_BASE_URL`** at **direct OpenAI**, **Azure OpenAI**, **Ollama**, or any other **OpenAI-compatible** base URL — then use **that** provider’s API key and model IDs (not OpenRouter slugs). See **[LLM configuration](llm-configuration.md)**.
 
 ## Why pgvector if search is not in scope yet?
 
@@ -14,7 +14,7 @@ Simplicity: shared memory for background tasks, one config load, one database po
 
 ## What happens if onboarding fails?
 
-The error is logged and the result is posted back to the Slack channel. An admin can run **`@forest init`** again after fixing permissions, OpenRouter, or database issues.
+The error is logged and the result is posted back to the Slack channel. An admin can run **`@forest init`** again after fixing permissions, LLM configuration, or database issues.
 
 ## Why a text list for `@forest show` instead of an interactive tree UI?
 
@@ -26,15 +26,15 @@ Yes, if you provide PostgreSQL with the **vector** extension yourself and set `D
 
 ## How do I change embedding dimensions? / `expected X dimensions, not Y`
 
-The `file_nodes.embedding` column is `vector(N)` and must match your embedding model's output length. The default after all migrations is **3072** (revision `e2b3f002`).
+The `file_nodes.embedding` column is `vector(N)` and must match your embedding model's output length. The default schema is **`vector(768)`** (revision `e2b3f001`), with **`text-embedding-3-small`**-style models and the API `dimensions` parameter (see [LLM configuration](llm-configuration.md)).
 
 If you see a dimension mismatch, align three places:
 
 1. **`EMBEDDING_VECTOR_DIMENSIONS`** and `Vector(...)` in `forest/models/file_node.py`
 2. **Alembic** migration for the column (`vector(N)` in the DB)
-3. **`EMBEDDING_MODEL_ID`** on OpenRouter — pick a model whose output length is **N**
+3. **`EMBEDDING_MODEL_ID`** for your LLM endpoint — pick a model whose output length is **N**
 
-Then rebuild and restart.
+Then rebuild and restart. If you change embedding dimension or model after data exists, plan a **re-embedding** strategy; see [LLM configuration → Changing embedding model](llm-configuration.md#changing-embedding-model).
 
 ## Is duplicate content avoided?
 
