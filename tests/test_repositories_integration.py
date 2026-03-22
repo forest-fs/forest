@@ -43,7 +43,7 @@ async def test_ensure_path_and_file_roundtrip() -> None:
             source_url="https://example.com/x",
             message_url="https://slack.com/archives/C123/p456",
             summary="A doc",
-            embedding=[0.0] * 3072,
+            embedding=[0.0] * 768,
             external_key="k1",
         )
         await session.commit()

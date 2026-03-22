@@ -9,7 +9,7 @@
 You need accounts and tokens for:
 
 - A **Slack** application (bot token + signing secret). See [Slack app setup](slack-app-setup.md) for the full walkthrough.
-- **[OpenRouter](https://openrouter.ai/)** (API key and chosen model slugs).
+- An **LLM** reachable via an **OpenAI-compatible** HTTP API (default: [OpenRouter](https://openrouter.ai/)). See **[LLM configuration](llm-configuration.md)** for keys, `LLM_BASE_URL`, model IDs, and embedding dimensions.
 
 ## Clone and install Python dependencies
 
@@ -31,13 +31,14 @@ Set at least:
 - `DATABASE_URL` — for **host** runs, default points at Postgres on `localhost`. The **`forest` Docker Compose service** overrides this to use the Compose network hostname `postgres` (you can keep `localhost` in `.env` when using Compose; see root README).
 - `SLACK_BOT_TOKEN` — from your Slack app's OAuth & Permissions page
 - `SLACK_SIGNING_SECRET` — from your Slack app's Basic Information page
-- `OPENROUTER_API_KEY`
+- `LLM_API_KEY` (or legacy `OPENROUTER_API_KEY`)
 - `CHAT_MODEL_ID`
 - `EMBEDDING_MODEL_ID`
 
 Optional:
 
-- `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_NAME` — OpenRouter attribution headers.
+- `LLM_BASE_URL` (or `OPENROUTER_BASE_URL`; default is OpenRouter)
+- `LLM_HTTP_REFERER`, `LLM_APP_NAME` (or `OPENROUTER_*`) — OpenRouter attribution headers
 
 ## Database and Docker Compose
 
@@ -66,7 +67,11 @@ Docker images install `psycopg2-binary` for the same Alembic step inside `docker
 
 ## Embedding dimension
 
-After the initial revision and **`e2b3f002`**, the ORM uses **`vector(3072)`** (`EMBEDDING_VECTOR_DIMENSIONS`). Your `EMBEDDING_MODEL_ID` must output **3072**-length vectors, or you must change the constant and ship a matching Alembic `ALTER COLUMN` (document any change in README for operators).
+The initial Alembic revision (**`e2b3f001`**) creates **`vector(768)`** (`EMBEDDING_VECTOR_DIMENSIONS`). The app requests that size from the embedding API when the model supports a `dimensions` parameter (e.g. `text-embedding-3-small` on OpenAI or `openai/text-embedding-3-small` on OpenRouter). Your `EMBEDDING_MODEL_ID` must yield **768**-length vectors for that setup, or you must change the constant and ship a matching Alembic `ALTER COLUMN` (document any change for operators).
+
+> **Older checkouts:** embedding dimension used to be adjusted in follow-up migrations (`e2b3f002`, `e2b3f003`). Those revisions were **removed** in favor of a single schema. If you already applied the old chain in production, do **not** reset Alembic blindly — treat this repo as a fresh baseline or migrate your DB manually.
+
+Switching to a different embedding model or dimension is **not** only a config change if `N` changes: see **[LLM configuration → Changing embedding model](llm-configuration.md#changing-embedding-model)**.
 
 ## Running
 

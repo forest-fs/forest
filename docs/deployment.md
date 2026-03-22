@@ -15,7 +15,7 @@ Both paths follow the same pattern:
 
 - Docker installed locally (to build and push the image).
 - The provider's CLI authenticated (`aws` or `gcloud`).
-- A filled-in `.env` with your Slack and OpenRouter credentials (see [Installation](installation.md)).
+- A filled-in `.env` with your Slack and LLM credentials (see [Installation](installation.md) and [LLM configuration](llm-configuration.md)).
 
 ---
 
@@ -62,6 +62,8 @@ docker push <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/forest:latest
 ```
 
 ### 3. Compute — ECS Fargate
+
+You can use `LLM_API_KEY` / `LLM_BASE_URL` instead of `OPENROUTER_*` if you prefer — see [LLM configuration](llm-configuration.md).
 
 Create a task definition (`forest-task.json`):
 
@@ -308,7 +310,7 @@ poetry run alembic upgrade head
 ## Security checklist
 
 - [ ] Database is **not** publicly accessible in production (use VPC peering / private networking).
-- [ ] Secrets (`SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `OPENROUTER_API_KEY`, `DATABASE_URL`) are stored in a secrets manager, not in plaintext env vars.
+- [ ] Secrets (`SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `LLM_API_KEY` or `OPENROUTER_API_KEY`, `DATABASE_URL`) are stored in a secrets manager, not in plaintext env vars.
 - [ ] HTTPS is terminated at the load balancer (ALB) or provided by the platform (Cloud Run, App Runner).
 - [ ] Database credentials use a strong, unique password.
 - [ ] Security groups / firewall rules restrict Postgres access to the application only.

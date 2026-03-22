@@ -22,5 +22,5 @@ If the workspace is not initialized yet, ingest is skipped until `@forest init` 
 
 ## Operational cautions
 
-- **Rate limits**: Slack API and OpenRouter; the app uses per-workspace semaphores to reduce bursts.
+- **Rate limits**: Slack API and your LLM provider; the app uses per-workspace semaphores to reduce bursts.
 - **Secrets**: never commit `.env` or paste tokens into logs at INFO level.

@@ -20,8 +20,10 @@ if TYPE_CHECKING:
     from forest.models.workspace import Workspace
 
 # Embedding column dimension; must match DB migration(s) and ``EMBEDDING_MODEL_ID`` output.
-# Common OpenRouter models use 1536 (e.g. text-embedding-3-small) or 3072 (e.g. large variants).
-EMBEDDING_VECTOR_DIMENSIONS = 3072
+# Default **768** keeps pgvector storage small; use ``text-embedding-3-small`` (or similar)
+# with the API ``dimensions`` parameter — see ``LLMService.embed_summary`` and
+# docs/llm-configuration.md.
+EMBEDDING_VECTOR_DIMENSIONS = 768
 
 
 class NodeType(str, enum.Enum):

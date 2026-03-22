@@ -13,17 +13,10 @@ Say _sayionara_ to organizing these yourself (or even worse, having someone else
 ## Usage
 
 
-Browse your workspace tree with `@forest show`.
+Browse your workspace tree with `@forest show`, or fomd any file by context with `@forest find`.
 
 <p align="center">
   <img src="public/forest-show.png" alt="@forest find lets you search by natural language — ask for 'ui mockup Tim and I discussed' and get the file along with the conversation context." width="700" />
-</p>
-
-Find any file by context with `@forest find`.
-
-
-<p align="center">
-  <img src="public/forest-find.png" alt="@forest show returns a virtual file tree organized by topic — engineering, design, fundraising — pulling files from GitHub, Figma, Notion, and more." width="700" />
 </p>
 
 
@@ -50,7 +43,7 @@ Create a Slack app, add the required scopes and event subscriptions, then copy t
    cp .env.example .env
    ```
 
-   Set `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `OPENROUTER_API_KEY`, `CHAT_MODEL_ID`, and `EMBEDDING_MODEL_ID`.
+   Set `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `LLM_API_KEY` (or `OPENROUTER_API_KEY`), `CHAT_MODEL_ID`, and `EMBEDDING_MODEL_ID`. **Default** URL is **OpenRouter**; to use **direct OpenAI** or another **OpenAI-compatible** API instead, set `LLM_BASE_URL` — see **[docs/llm-configuration.md](docs/llm-configuration.md)**.
 
 2. Run everything with Docker Compose (Postgres + Forest):
 
@@ -77,7 +70,7 @@ Create a Slack app, add the required scopes and event subscriptions, then copy t
 
    Copy the `https://….trycloudflare.com` URL and set it as your Slack app's **Event Subscriptions → Request URL** (`https://<tunnel-host>/slack/events`).
 
-Full local setup details (migrations, embedding dimensions, troubleshooting): **[docs/installation.md](docs/installation.md)**.
+Full local setup details (migrations, embedding dimensions, troubleshooting): **[docs/installation.md](docs/installation.md)**. LLM endpoints and model IDs: **[docs/llm-configuration.md](docs/llm-configuration.md)**.
 
 ### Remote setup (AWS / GCP)
 
@@ -85,7 +78,7 @@ Forest is a single container + managed Postgres — the pattern is the same on a
 
 1. **Provision PostgreSQL with pgvector** (RDS on AWS, Cloud SQL on GCP).
 2. **Push the Docker image** to a container registry (ECR / Artifact Registry).
-3. **Deploy the container** with environment variables pointing at the database and your Slack/OpenRouter credentials.
+3. **Deploy the container** with environment variables pointing at the database and your Slack/LLM credentials (`LLM_API_KEY` or `OPENROUTER_API_KEY`; see [LLM configuration](docs/llm-configuration.md)).
 4. **Point Slack** at the public HTTPS endpoint (`https://<host>/slack/events`).
 
 | | AWS | GCP |
@@ -108,7 +101,7 @@ For DB integration tests, set `FOREST_RUN_DB_INTEGRATION=1` with Postgres runnin
 
 ## More Documentation
 
-Longer-form docs (purpose, architecture, installation, FAQ) live under [docs/](docs/index.md).
+Longer-form docs (purpose, architecture, installation, LLM setup, FAQ) live under [docs/](docs/index.md).
 
 ## TODOs
 

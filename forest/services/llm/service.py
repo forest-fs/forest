@@ -290,6 +290,10 @@ class LLMService:
         """
         Embed summary text using the configured ``EMBEDDING_MODEL_ID``.
 
+        Sends ``dimensions=EMBEDDING_VECTOR_DIMENSIONS`` so OpenAI-compatible models
+        that support shortening (e.g. ``text-embedding-3-small``) return vectors that
+        match the ``pgvector`` column.
+
         Parameters
         ----------
         text : str
@@ -311,14 +315,16 @@ class LLMService:
                 resp = await self._client.embeddings.create(
                     model=self._settings.embedding_model_id,
                     input=text[:8000],
+                    dimensions=EMBEDDING_VECTOR_DIMENSIONS,
                 )
                 vec = list(resp.data[0].embedding)
                 if len(vec) != EMBEDDING_VECTOR_DIMENSIONS:
                     raise ValueError(
                         f"Embedding length {len(vec)} does not match schema "
-                        f"{EMBEDDING_VECTOR_DIMENSIONS}. Use an OpenRouter model with "
+                        f"{EMBEDDING_VECTOR_DIMENSIONS}. Pick an embedding model with "
                         "that output size, or change the pgvector column and "
-                        "EMBEDDING_VECTOR_DIMENSIONS in code via migrations."
+                        "EMBEDDING_VECTOR_DIMENSIONS in code via migrations "
+                        "(see docs/llm-configuration.md)."
                     )
                 return vec
             except (RateLimitError, APIStatusError, TimeoutError) as e:
