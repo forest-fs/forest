@@ -2,7 +2,7 @@
 
 ## High-level picture
 
-Forest runs as **one HTTP process** (Uvicorn) serving:
+`forest` runs as **one HTTP process** (Uvicorn) serving:
 
 1. **FastAPI** health and readiness probes (`/healthz`, `/ready`).
 2. **Slack Events API** webhook (`/slack/events`) for passive message ingest.

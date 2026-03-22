@@ -24,15 +24,17 @@ The error is logged and the result is posted back to the Slack channel. An admin
 
 Yes, if you provide PostgreSQL with the **vector** extension yourself and set `DATABASE_URL` accordingly. The repo includes Compose as the **baseline** for local development and CI parity.
 
-## How do I change embedding dimensions?
+## How do I change embedding dimensions? / `expected X dimensions, not Y`
 
-Align three places: constant **`EMBEDDING_VECTOR_DIMENSIONS`** and `Vector(...)` in `forest/models/file_node.py`, **Alembic** migrations (`vector(N)` in the DB), and an `EMBEDDING_MODEL_ID` on OpenRouter whose output length is **N**.
+The `file_nodes.embedding` column is `vector(N)` and must match your embedding model's output length. The default after all migrations is **3072** (revision `e2b3f002`).
 
-The default schema after all migrations is **3072** (revision `e2b3f002`). If you see `expected 1536 dimensions, not 3072` (or the opposite), your model output and the database column disagree: run `poetry run alembic upgrade head`, or switch models, or add a migration to change `N`.
+If you see a dimension mismatch, align three places:
 
-## ``expected X dimensions, not Y`` when ingesting?
+1. **`EMBEDDING_VECTOR_DIMENSIONS`** and `Vector(...)` in `forest/models/file_node.py`
+2. **Alembic** migration for the column (`vector(N)` in the DB)
+3. **`EMBEDDING_MODEL_ID`** on OpenRouter — pick a model whose output length is **N**
 
-The embedding API returned length **Y** but the `file_nodes.embedding` column is `vector(X)`. Fix by using a model with output size **X**, or migrate the column to `vector(Y)` and update `EMBEDDING_VECTOR_DIMENSIONS` to match (then rebuild/restart).
+Then rebuild and restart.
 
 ## Is duplicate content avoided?
 
