@@ -8,7 +8,7 @@
 
 You need accounts and tokens for:
 
-- A **Discord** application and bot user. Step-by-step: [Discord setup](discord-setup.md).
+- A **Slack** application (bot token + signing secret). See [Usage](usage.md) for setup steps.
 - **[OpenRouter](https://openrouter.ai/)** (API key and chosen model slugs).
 
 ## Clone and install Python dependencies
@@ -29,14 +29,14 @@ cp .env.example .env
 Set at least:
 
 - `DATABASE_URL` — for **host** runs, default points at Postgres on `localhost`. The **`forest` Docker Compose service** overrides this to use the Compose network hostname `postgres` (you can keep `localhost` in `.env` when using Compose; see root README).
-- `DISCORD_TOKEN` — from the Discord Developer Portal; see [Discord setup](discord-setup.md)
+- `SLACK_BOT_TOKEN` — from your Slack app's OAuth & Permissions page
+- `SLACK_SIGNING_SECRET` — from your Slack app's Basic Information page
 - `OPENROUTER_API_KEY`
 - `CHAT_MODEL_ID`
 - `EMBEDDING_MODEL_ID`
 
 Optional:
 
-- `DISCORD_SYNC_GUILD_ID` — speeds up slash command sync during development.
 - `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_NAME` — OpenRouter attribution headers.
 
 ## Database and Docker Compose

@@ -32,7 +32,7 @@ async def test_ensure_path_and_file_roundtrip() -> None:
     async with async_session_factory() as session:
         wr = WorkspaceRepository(session)
         fr = FileNodeRepository(session)
-        ws = await wr.upsert_workspace(platform="discord", platform_workspace_id=str(uuid.uuid4()))
+        ws = await wr.upsert_workspace(platform="slack", platform_workspace_id=str(uuid.uuid4()))
         await fr.ensure_root(ws.id)
         parent = await fr.ensure_path(ws.id, "/Docs/2024")
         await fr.insert_file(
@@ -41,7 +41,7 @@ async def test_ensure_path_and_file_roundtrip() -> None:
             name="readme.md",
             full_path="/Docs/2024/readme.md",
             source_url="https://example.com/x",
-            message_url="https://discord.com/channels/1/2/3",
+            message_url="https://slack.com/archives/C123/p456",
             summary="A doc",
             embedding=[0.0] * 3072,
             external_key="k1",

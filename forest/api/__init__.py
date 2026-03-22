@@ -1,5 +1,5 @@
 """
-FastAPI application factory (health and readiness endpoints only in MVP).
+FastAPI application factory (health, readiness, and Slack webhook routes).
 """
 
 from forest.api.app import create_app

@@ -7,7 +7,7 @@ Forest is a **virtual filesystem** backed by a database, not by blobs on disk. I
 - Where a shared link or attachment *belongs* in a folder tree (LLM-suggested path).
 - **Pointers** (URLs), **message jump links**, **short summaries**, and **embeddings** for future semantic search.
 
-The MVP targets **Discord only**. Other chat systems are intentionally out of scope until a separate adapter is written.
+The current version targets **Slack** via the Events API and bot mention commands.
 
 ## Problems it addresses
 
@@ -15,22 +15,21 @@ The MVP targets **Discord only**. Other chat systems are intentionally out of sc
 - **Manual filing** does not scale; Forest automates placement using context and an existing directory scaffold.
 - **Search later**: vectors are stored on ingest so enabling similarity search later does not require a full backfill (see [Extensions](extensions.md)).
 
-## MVP scope
+## Scope
 
 In scope:
 
-- Discord bot with passive `on_message` ingest (attachments + HTTP(S) URLs).
-- Onboarding: seed directory tree from channel names (LLM) on guild join or `/forest init`.
-- Browse: paginated `/forest files` as a nested markdown list (no interactive tree UI).
+- Slack Events API passive ingest (attachments + HTTP(S) URLs).
+- Onboarding: seed directory tree from channel names and history (LLM) via `@forest init`.
+- Browse: `@forest show` as a nested list with Slack mrkdwn links.
 - OpenRouter-only LLM access (OpenAI-compatible HTTP).
 - PostgreSQL with **pgvector**, FastAPI **healthz** / **ready**, stdlib logging.
 
-Explicitly out of scope for the initial build (may be documented as future work):
+Explicitly out of scope (may be documented as future work):
 
-- Semantic search UI (`/forest find`) and ANN index tuning.
+- Semantic search UI (`@forest find`) and ANN index tuning.
 - Full telemetry (metrics, tracing, `/metrics`).
 - Storing file bytes, malware scanning, or enterprise ACLs per folder.
-- Slack, Teams, or other platforms (layout is reserved; see [Extensions](extensions.md)).
 
 ## Who this documentation is for
 

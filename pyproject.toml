@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "forest"
 version = "0.1.0"
-description = "Forest — AI-native virtual file system for Discord"
+description = "Forest — AI-native virtual file system for Slack"
 authors = []
 readme = "README.md"
 packages = [{ include = "forest" }]
@@ -10,7 +10,8 @@ packages = [{ include = "forest" }]
 python = "^3.11"
 fastapi = "^0.115.0"
 uvicorn = { extras = ["standard"], version = "^0.32.0" }
-discord-py = "^2.4.0"
+slack-sdk = "^3.33.0"
+aiohttp = "^3.10.0"
 sqlalchemy = { extras = ["asyncio"], version = "^2.0.36" }
 asyncpg = "^0.30.0"
 alembic = "^1.14.0"

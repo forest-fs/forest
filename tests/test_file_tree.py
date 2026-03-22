@@ -32,9 +32,9 @@ def test_file_nodes_to_tree_lines_nested() -> None:
     ]
     lines = file_nodes_to_tree_lines(nodes)
     assert lines == [
-        "- **project/**",
+        "- *project/*",
         "  - README.md",
-        "  - **src/**",
+        "  - *src/*",
         "    - main.py — https://x.example/a",
         "    - util.py — https://x.example/a",
     ]
@@ -44,18 +44,18 @@ def test_file_nodes_to_tree_lines_sorted_siblings() -> None:
     nodes = [_file("/z/a"), _file("/m/b"), _file("/m/a")]
     lines = file_nodes_to_tree_lines(nodes)
     assert lines == [
-        "- **m/**",
+        "- *m/*",
         "  - a — https://x.example/a",
         "  - b — https://x.example/a",
-        "- **z/**",
+        "- *z/*",
         "  - a — https://x.example/a",
     ]
 
 
-def test_file_nodes_to_tree_lines_discord_markdown_links() -> None:
+def test_file_nodes_to_tree_lines_slack_mrkdwn_links() -> None:
     nodes = [_file("/m/a")]
-    lines = file_nodes_to_tree_lines(nodes, discord_markdown_links=True)
+    lines = file_nodes_to_tree_lines(nodes, slack_mrkdwn_links=True)
     assert lines == [
-        "- **m/**",
-        "  - [a](<https://x.example/a>)",
+        "- *m/*",
+        "  - <https://x.example/a|a>",
     ]

@@ -56,9 +56,9 @@ class IngestPayload(BaseModel):
     Attributes
     ----------
     workspace_key : str
-        External workspace id (Discord guild id string in the MVP).
-    platform : {'discord'}
-        Source platform literal for future expansion.
+        External workspace id (Slack team_id string).
+    platform : {'slack'}
+        Source platform literal.
     channel_id, channel_label : str
         Channel identity and human label for logging / prompts.
     message_id, message_url : str
@@ -66,7 +66,7 @@ class IngestPayload(BaseModel):
     author_display : str
         Who posted the message.
     posted_at : datetime
-        Message timestamp (timezone-aware from Discord).
+        Message timestamp (timezone-aware).
     message_text : str
         Plain text body (may be empty if attachments-only).
     attachments : list of AttachmentRef
@@ -82,8 +82,8 @@ class IngestPayload(BaseModel):
     routing + embedding calls (one DB transaction per cue).
     """
 
-    workspace_key: str = Field(..., description="Platform workspace id (e.g. Discord guild id)")
-    platform: Literal["discord"] = "discord"
+    workspace_key: str = Field(..., description="Platform workspace id (e.g. Slack team_id)")
+    platform: Literal["slack"] = "slack"
     channel_id: str
     channel_label: str
     message_id: str

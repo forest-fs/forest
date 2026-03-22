@@ -300,7 +300,7 @@ class FileNodeRepository:
 
     async def list_files_flat(self, workspace_id: uuid.UUID) -> list[FileNode]:
         """
-        Return all **file** nodes sorted by ``full_path`` (for slash command listing).
+        Return all **file** nodes sorted by ``full_path`` (for ``@forest show`` listing).
 
         Parameters
         ----------

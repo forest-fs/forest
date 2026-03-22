@@ -2,7 +2,7 @@
 Runtime configuration loaded from environment (and optional ``.env``).
 
 Secrets must never be committed; use ``.env`` locally (gitignored) or injected
-secrets in production. The LLM path is **OpenRouter only** in the MVP (OpenAI-compatible
+secrets in production. The LLM path is **OpenRouter only** (OpenAI-compatible
 HTTP via the ``openai`` SDK with ``base_url``).
 """
 
@@ -35,12 +35,8 @@ class Settings(BaseSettings):
         ...,
         description="Async SQLAlchemy URL, e.g. postgresql+asyncpg://user:pass@host:5432/db",
     )
-    discord_token: SecretStr = Field(..., validation_alias="DISCORD_TOKEN")
-    discord_sync_guild_id: str | None = Field(
-        default=None,
-        validation_alias="DISCORD_SYNC_GUILD_ID",
-        description="Optional guild id for faster slash-command sync during development",
-    )
+    slack_bot_token: SecretStr = Field(..., validation_alias="SLACK_BOT_TOKEN")
+    slack_signing_secret: SecretStr = Field(..., validation_alias="SLACK_SIGNING_SECRET")
 
     host: str = Field(default="0.0.0.0", validation_alias="HOST")
     port: int = Field(default=8000, validation_alias="PORT")
@@ -77,7 +73,7 @@ class Settings(BaseSettings):
     onboarding_history_oldest_first: bool = Field(
         default=False,
         validation_alias="FOREST_ONBOARDING_HISTORY_OLDEST_FIRST",
-        description="If true, fill transcript budget from oldest messages first; default newest first",
+        description="If true, fill transcript budget from oldest messages first",
     )
 
 
