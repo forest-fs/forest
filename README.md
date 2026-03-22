@@ -1,18 +1,47 @@
-# Forest
+# 森 forest
 
-Passive capture of links and attachments from Discord, LLM-chosen placement in a virtual folder tree, and a flat paginated browse command. This MVP uses PostgreSQL with pgvector (embeddings stored for future semantic search), OpenRouter as the only LLM path, FastAPI for health checks, and stdlib logging.
+`森 forest` is a lightweight intelligence layer that manages your workspace knowledge directly from your chats, _so that you don't have to_.
 
-## Documentation
+Naturally, teams will share files from different platforms and discuss them in chat — forest listens and organizes.
 
-Longer-form docs (purpose, architecture, installation, FAQ, and notes for a future static site such as `forest.docs`) live under [docs/](docs/index.md). For the Discord bot token and invite flow, see [docs/discord-setup.md](docs/discord-setup.md).
+<p align="center">
+  <img src="public/forest-flow.png" alt="Teams create cross-platform files and discuss them in Discord, Slack, or Teams — forest connects to those conversations and builds a knowledge layer." />
+</p>
 
-## Requirements
+Say _sayionara_ to organizing these yourself (or even worse, having someone else organize them!); just let your teammates create/store them in their platforms of preference, and let `森 forest` manage the rest.
+
+## Usage
+
+
+Browse your workspace tree with `/forest show`.
+
+<p align="center">
+  <img src="public/forest-show.png" alt="/forest find lets you search by natural language — ask for 'ui mockup Tim and I discussed' and get the file along with the conversation context." width="700" />
+</p>
+
+Find any file by context with `/forest find`.
+
+
+<p align="center">
+  <img src="public/forest-find.png" alt="/forest show returns a virtual file tree organized by topic — engineering, design, fundraising — pulling files from GitHub, Figma, Notion, and more." width="700" />
+</p>
+
+
+
+## Self Hosting
+For full privacy, we let _you_ host it, it's simple to set up, just follow the steps below.
+
+
+----
+_this section is out dated until we figure out the self hosting story_
+
+### Requirements
 
 - Python 3.11+
 - [Poetry](https://python-poetry.org/)
 - Docker (for local Postgres + pgvector)
 
-## Local setup
+### Local setup
 
 1. Copy environment template and fill in secrets:
 
@@ -47,7 +76,7 @@ Longer-form docs (purpose, architecture, installation, FAQ, and notes for a futu
    - `GET /healthz` — process up
    - `GET /ready` — database reachable
 
-## Discord
+### Discord
 
 Enable **Message Content Intent** (and guild/message intents as needed) in the Developer Portal. Bot permissions: read messages, read history, embed links, use slash commands.
 
@@ -60,7 +89,8 @@ Slash commands:
 
 Optional `DISCORD_SYNC_GUILD_ID` in `.env` speeds up slash command sync while developing.
 
-## Tests
+
+### Tests
 
 Unit tests run without a live database. Optional DB integration tests:
 
@@ -70,7 +100,13 @@ export FOREST_RUN_DB_INTEGRATION=1
 poetry run pytest
 ```
 
-## Post-MVP (not implemented here)
+## More Documentation
+
+Longer-form docs (purpose, architecture, installation, FAQ, and notes for a future static site such as `forest.docs`) live under [docs/](docs/index.md). For the Discord bot token and invite flow, see [docs/discord-setup.md](docs/discord-setup.md).
+
+
+
+## TODOs
 
 - Semantic search (`/forest find`) and pgvector ANN tuning (repository search, query embeddings, ANN index).
 - Telemetry (`/metrics`, OpenTelemetry, or similar) and a small observability facade.
