@@ -4,35 +4,37 @@
 
 The MVP standardizes on one OpenAI-compatible HTTP surface with a single API key and model slugs. Vendor-specific SDKs are avoided so routing and policy stay centralized. You can still target many models **through** OpenRouter.
 
-## Why pgvector if search is not in MVP?
+## Why pgvector if search is not in scope yet?
 
-Embeddings are computed and stored on ingest so **semantic search can ship later without backfilling** every historical file, unless you explicitly choose a summary-only mode elsewhere.
+Embeddings are computed and stored on ingest so **semantic search can ship later without backfilling** every historical file.
 
-## Why one process for HTTP and Discord?
+## Why one HTTP process?
 
-Simplicity: shared memory for the ingest queue, one config load, one database pool. Horizontal scaling would require a durable queue or out-of-process workers (out of MVP scope).
+Simplicity: shared memory for background tasks, one config load, one database pool. Slack webhooks + health routes all run in a single Uvicorn process.
 
-## What happens if onboarding fails on guild join?
+## What happens if onboarding fails?
 
-Auto-onboarding is best-effort and logged. An admin can run **`/forest init`** after fixing permissions, OpenRouter, or database issues.
+The error is logged and the result is posted back to the Slack channel. An admin can run **`@forest init`** again after fixing permissions, OpenRouter, or database issues.
 
-## Why a markdown list for `/forest files` instead of an interactive tree UI?
+## Why a text list for `@forest show` instead of an interactive tree UI?
 
-`/forest files` renders a **nested bullet list** (Markdown: indented `-` lines, bold folder names, `[filename](url)` for files) so Discord can **linkify** URLs. It stays **paginated** by line for message limits. A clickable hierarchical navigator is out of MVP scope.
+`@forest show` renders a **nested bullet list** (indented `-` lines, bold folder names, `<url|name>` for files) using Slack mrkdwn. A clickable hierarchical navigator is out of scope for now.
 
 ## Can I run without Docker?
 
 Yes, if you provide PostgreSQL with the **vector** extension yourself and set `DATABASE_URL` accordingly. The repo includes Compose as the **baseline** for local development and CI parity.
 
-## How do I change embedding dimensions?
+## How do I change embedding dimensions? / `expected X dimensions, not Y`
 
-Align three places: constant **`EMBEDDING_VECTOR_DIMENSIONS`** and `Vector(...)` in `forest/models/file_node.py`, **Alembic** migrations (`vector(N)` in the DB), and an `EMBEDDING_MODEL_ID` on OpenRouter whose output length is **N**.
+The `file_nodes.embedding` column is `vector(N)` and must match your embedding model's output length. The default after all migrations is **3072** (revision `e2b3f002`).
 
-The default schema after all migrations is **3072** (revision `e2b3f002`). If you see `expected 1536 dimensions, not 3072` (or the opposite), your model output and the database column disagree: run `poetry run alembic upgrade head`, or switch models, or add a migration to change `N`.
+If you see a dimension mismatch, align three places:
 
-## ``expected X dimensions, not Y`` when ingesting?
+1. **`EMBEDDING_VECTOR_DIMENSIONS`** and `Vector(...)` in `forest/models/file_node.py`
+2. **Alembic** migration for the column (`vector(N)` in the DB)
+3. **`EMBEDDING_MODEL_ID`** on OpenRouter — pick a model whose output length is **N**
 
-The embedding API returned length **Y** but the `file_nodes.embedding` column is `vector(X)`. Fix by using a model with output size **X**, or migrate the column to `vector(Y)` and update `EMBEDDING_VECTOR_DIMENSIONS` to match (then rebuild/restart).
+Then rebuild and restart.
 
 ## Is duplicate content avoided?
 
@@ -40,7 +42,7 @@ Ingest uses an **`external_key`** (hash of source URL and message id) with a par
 
 ## Where do I add business logic that must stay platform-independent?
 
-**`forest/services/`**, operating on **`forest/integrations/`** types and repositories — not inside `platforms/discord`.
+**`forest/services/`**, operating on **`forest/integrations/`** types and repositories — not inside `platforms/slack`.
 
 ## How do tests run without a real database?
 

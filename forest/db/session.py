@@ -39,7 +39,7 @@ async def session_scope() -> AsyncIterator[AsyncSession]:
     Notes
     -----
     On success, commits the transaction. On any exception, rolls back and re-raises.
-    Prefer one scope per logical unit of work (e.g. one ingest cue, one slash command).
+    Prefer one scope per logical unit of work (e.g. one ingest cue, one mention command).
 
     Examples
     --------

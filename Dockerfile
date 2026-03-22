@@ -1,4 +1,4 @@
-# Forest: Discord bot + FastAPI in one process.
+# Forest: FastAPI HTTP server (Slack webhooks) in one process.
 FROM python:3.11-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1 \

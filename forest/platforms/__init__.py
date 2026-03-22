@@ -1,6 +1,6 @@
 """
-Chat platform adapters (Discord in MVP).
+Chat platform adapters (Slack).
 
 Core services consume :mod:`forest.integrations` DTOs only; this package owns SDK
-clients and slash-command UX.
+clients and webhook handlers.
 """

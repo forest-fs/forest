@@ -1,6 +1,3 @@
 """
-Slack adapter placeholder (not implemented in MVP).
-
-Reserved so future Bolt/events code can live beside ``platforms/discord`` without
-reshaping ``forest.services``.
+Slack platform adapter: payload builder, context fetching, and onboarding scan.
 """

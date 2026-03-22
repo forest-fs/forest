@@ -1,5 +1,5 @@
 """
-Forest — virtual filesystem for chat platforms (Discord MVP).
+Forest — virtual filesystem for chat platforms (Slack).
 
 This package is the import root for the application. Version is exposed for
 distribution metadata and operational debugging.

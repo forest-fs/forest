@@ -1,5 +1,5 @@
 """
-``Workspace`` model: one row per platform workspace (e.g. Discord guild).
+``Workspace`` model: one row per platform workspace (e.g. Slack team).
 """
 
 from __future__ import annotations
@@ -19,16 +19,16 @@ if TYPE_CHECKING:
 
 class Workspace(Base):
     """
-    Tenant root: maps an external workspace (guild/team) to Forest state.
+    Tenant root: maps an external workspace (Slack team) to Forest state.
 
     Attributes
     ----------
     id : uuid.UUID
         Primary key.
     platform : str
-        Adapter name today ``"discord"``; reserved for future platforms.
+        Adapter name (``"slack"``).
     platform_workspace_id : str
-        Opaque platform id (e.g. Discord guild id as string).
+        Opaque platform id (e.g. Slack team_id string).
     is_initialized : bool
         When true, onboarding has created the virtual root and seeded directories.
     created_at, updated_at : datetime
@@ -43,7 +43,7 @@ class Workspace(Base):
     __tablename__ = "workspaces"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    platform: Mapped[str] = mapped_column(String(32), nullable=False, default="discord")
+    platform: Mapped[str] = mapped_column(String(32), nullable=False, default="slack")
     platform_workspace_id: Mapped[str] = mapped_column(String(64), nullable=False)
     is_initialized: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

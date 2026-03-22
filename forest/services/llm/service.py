@@ -163,19 +163,20 @@ class LLMService:
     async def generate_base_tree(
         self,
         channel_names: list[str],
-        guild_name: str | None,
+        workspace_name: str | None,
         *,
         channel_histories: list[dict[str, Any]] | None = None,
     ) -> BaseTreeOutput:
         """
-        Propose a nested folder tree from channel names, optional message excerpts, and guild metadata.
+        Propose a nested folder tree from channel names, optional message
+        excerpts, and workspace metadata.
 
         Parameters
         ----------
         channel_names : list of str
             Channel / thread labels as routing hints (order matches histories when present).
-        guild_name : str or None
-            Optional server name for context.
+        workspace_name : str or None
+            Optional workspace display name for context.
         channel_histories : list of dict, optional
             Rows with keys ``channel``, ``excerpt``, ``messages_scanned``, ``truncated`` from
             a full-history scan (excerpts may be capped).
@@ -191,7 +192,7 @@ class LLMService:
         """
         system = (
             "You output JSON only, no prose. "
-            "Design a sensible folder tree for organizing files shared in a Discord server. "
+            "Design a sensible folder tree for organizing files shared in a team workspace. "
             "Return shape: {\"folders\":[{\"name\":string,\"children\":[...]}]}. "
             "Max depth 4. Names short, filesystem-safe (no slashes). "
             "Use channel names and, when present, message excerpts to infer topics, projects, and "
@@ -199,7 +200,7 @@ class LLMService:
             "If excerpts are truncated or missing for a channel, rely on its name."
         )
         payload: dict[str, Any] = {
-            "guild_name": guild_name,
+            "workspace_name": workspace_name,
             "text_channels": channel_names,
         }
         if channel_histories:

@@ -1,18 +1,48 @@
-# Forest
+# 森 forest
 
-Passive capture of links and attachments from Discord, LLM-chosen placement in a virtual folder tree, and a flat paginated browse command. This MVP uses PostgreSQL with pgvector (embeddings stored for future semantic search), OpenRouter as the only LLM path, FastAPI for health checks, and stdlib logging.
+`森 forest` is a lightweight intelligence layer that manages your workspace knowledge directly from your chats, _so that you don't have to_.
 
-## Documentation
+Naturally, teams will share files from different platforms and discuss them in chat — forest listens and organizes.
 
-Longer-form docs (purpose, architecture, installation, FAQ, and notes for a future static site such as `forest.docs`) live under [docs/](docs/index.md). For the Discord bot token and invite flow, see [docs/discord-setup.md](docs/discord-setup.md).
+<p align="center">
+  <img src="public/forest-flow.png" alt="Teams share files and discuss them in Slack — forest connects to those conversations and builds a knowledge layer." />
+</p>
 
-## Requirements
+Say _sayionara_ to organizing these yourself (or even worse, having someone else organize them!); just let your teammates create/store them in their platforms of preference, and let `森 forest` manage the rest.
+
+## Usage
+
+
+Browse your workspace tree with `@forest show`.
+
+<p align="center">
+  <img src="public/forest-show.png" alt="@forest find lets you search by natural language — ask for 'ui mockup Tim and I discussed' and get the file along with the conversation context." width="700" />
+</p>
+
+Find any file by context with `@forest find`.
+
+
+<p align="center">
+  <img src="public/forest-find.png" alt="@forest show returns a virtual file tree organized by topic — engineering, design, fundraising — pulling files from GitHub, Figma, Notion, and more." width="700" />
+</p>
+
+
+
+## Self Hosting
+
+For full privacy, we let _you_ host it — it's simple to set up, just follow the steps below.
+
+### Requirements
 
 - Python 3.11+
 - [Poetry](https://python-poetry.org/)
 - Docker (for local Postgres + pgvector)
 
-## Local setup
+### Slack
+
+Create a Slack app, add the required scopes and event subscriptions, then copy the bot token and signing secret into `.env`. Full walkthrough: **[docs/slack-app-setup.md](docs/slack-app-setup.md)**.
+
+### Local setup
 
 1. Copy environment template and fill in secrets:
 
@@ -20,57 +50,67 @@ Longer-form docs (purpose, architecture, installation, FAQ, and notes for a futu
    cp .env.example .env
    ```
 
-   Set `DISCORD_TOKEN`, `OPENROUTER_API_KEY`, `CHAT_MODEL_ID`, and `EMBEDDING_MODEL_ID`. For **Docker Compose**, `DATABASE_URL` in `.env` can stay `localhost`; the `forest` service overrides it to reach the `postgres` container.
+   Set `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `OPENROUTER_API_KEY`, `CHAT_MODEL_ID`, and `EMBEDDING_MODEL_ID`.
 
-   After migrations, the `file_nodes.embedding` column is **`vector(3072)`** (see `EMBEDDING_VECTOR_DIMENSIONS` in code and Alembic `e2b3f002`). Use an OpenRouter embedding model whose output size matches (many large embedding models use 3072). If you use a **1536**-dim model instead, change the model constant and add an Alembic migration to match, or pick a 3072-dim model.
-
-2. Run everything with Docker Compose (Postgres + Forest: migrations, then bot + HTTP):
+2. Run everything with Docker Compose (Postgres + Forest):
 
    ```bash
    docker compose up --build
    ```
-
-   The Forest image runs `alembic upgrade head` on startup, then `poetry run forest`. HTTP is on port **8000** (override host mapping with `FOREST_HTTP_PORT` if needed).
 
    Or run **only Postgres** and use Poetry on the host:
 
    ```bash
    docker compose up -d postgres
    poetry install
-   export DATABASE_URL="${DATABASE_URL:-postgresql+asyncpg://forest:forest@localhost:5432/forest}"
    poetry run alembic upgrade head
    poetry run forest
    ```
 
-   Alembic uses a sync URL internally (`+psycopg2`); the dev dependency `psycopg2-binary` covers host runs; the Docker image installs it for migration startup.
+   HTTP is on port **8000**. `GET /healthz` for liveness, `GET /ready` for DB readiness.
 
-   - `GET /healthz` — process up
-   - `GET /ready` — database reachable
+3. Slack needs a **public HTTPS** URL. For local dev, use [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/):
 
-## Discord
+   ```bash
+   cloudflared tunnel --url http://127.0.0.1:8000
+   ```
 
-Enable **Message Content Intent** (and guild/message intents as needed) in the Developer Portal. Bot permissions: read messages, read history, embed links, use slash commands.
+   Copy the `https://….trycloudflare.com` URL and set it as your Slack app's **Event Subscriptions → Request URL** (`https://<tunnel-host>/slack/events`).
 
-Slash commands:
+Full local setup details (migrations, embedding dimensions, troubleshooting): **[docs/installation.md](docs/installation.md)**.
 
-- `/forest help` — short overview (anyone).
-- `/forest init` — scans readable channels (full message history, subject to transcript size limits in settings) and seeds the virtual tree (requires Manage Server). Also runs automatically when the bot joins a guild.
-- `/forest update` — same scan + re-merge new directories (recovery / layout refresh); does not replay ingest jobs for old messages.
-- `/forest files` — paginated **nested markdown list** of captured files (bold folders, files as `[name](url)` links).
+### Remote setup (AWS / GCP)
 
-Optional `DISCORD_SYNC_GUILD_ID` in `.env` speeds up slash command sync while developing.
+Forest is a single container + managed Postgres — the pattern is the same on any cloud:
 
-## Tests
+1. **Provision PostgreSQL with pgvector** (RDS on AWS, Cloud SQL on GCP).
+2. **Push the Docker image** to a container registry (ECR / Artifact Registry).
+3. **Deploy the container** with environment variables pointing at the database and your Slack/OpenRouter credentials.
+4. **Point Slack** at the public HTTPS endpoint (`https://<host>/slack/events`).
 
-Unit tests run without a live database. Optional DB integration tests:
+| | AWS | GCP |
+|---|---|---|
+| **Database** | RDS PostgreSQL 16 (`CREATE EXTENSION vector`) | Cloud SQL PostgreSQL 16 (`cloudsql.enable_pgvector=on`) |
+| **Compute** | ECS Fargate + ALB, or App Runner | Cloud Run |
+| **Registry** | ECR | Artifact Registry |
+| **HTTPS** | ALB with ACM cert, or App Runner built-in | Cloud Run built-in |
+| **Secrets** | Secrets Manager / SSM Parameter Store | Secret Manager |
+
+Full step-by-step CLI commands for both providers: **[docs/deployment.md](docs/deployment.md)**.
+
+### Tests
 
 ```bash
-export FOREST_RUN_DB_INTEGRATION=1
-# Postgres running with migrations applied (see above)
 poetry run pytest
 ```
 
-## Post-MVP (not implemented here)
+For DB integration tests, set `FOREST_RUN_DB_INTEGRATION=1` with Postgres running.
 
-- Semantic search (`/forest find`) and pgvector ANN tuning (repository search, query embeddings, ANN index).
+## More Documentation
+
+Longer-form docs (purpose, architecture, installation, FAQ) live under [docs/](docs/index.md).
+
+## TODOs
+
+- Semantic search (`@forest find`) and pgvector ANN tuning (repository search, query embeddings, ANN index).
 - Telemetry (`/metrics`, OpenTelemetry, or similar) and a small observability facade.

@@ -1,12 +1,11 @@
 """
-FastAPI application: ``/healthz`` (liveness) and ``/ready`` (DB connectivity).
-
-Metrics and full telemetry are explicitly out of scope for the MVP.
+FastAPI application: health endpoints and Slack webhook routes.
 """
 
 from fastapi import FastAPI
 from sqlalchemy import text
 
+from forest.api.slack_routes import router as slack_router
 from forest.db.session import engine
 
 
@@ -14,17 +13,15 @@ def create_app() -> FastAPI:
     """
     Build and return the FastAPI application instance.
 
-    Returns
-    -------
-    FastAPI
-        Configured app with MVP routes only.
-
-    Notes
-    -----
-    ``/ready`` performs a trivial ``SELECT 1`` against the configured database.
-    It does not validate Discord or OpenRouter connectivity.
+    Includes health/readiness probes and Slack Events API routes.
     """
     app = FastAPI(title="Forest", version="0.1.0")
+    app.include_router(slack_router)
+
+    @app.get("/")
+    async def root() -> dict[str, str]:
+        """Human-friendly entry when curling the tunnel or load-balancer root."""
+        return {"service": "forest", "healthz": "/healthz", "ready": "/ready"}
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
@@ -33,15 +30,7 @@ def create_app() -> FastAPI:
 
     @app.get("/ready")
     async def ready() -> dict[str, str]:
-        """
-        Readiness: database reachable.
-
-        Returns
-        -------
-        dict[str, str]
-            ``{"status": "ready"}`` on success, or ``{"status": "not_ready"}`` if
-            the database ping fails.
-        """
+        """Readiness: database reachable."""
         try:
             async with engine.connect() as conn:
                 await conn.execute(text("SELECT 1"))

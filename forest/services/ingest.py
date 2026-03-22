@@ -1,7 +1,7 @@
 """
 Ingest pipeline: map each attachment/URL cue to a routed path, summary, embedding, and DB row.
 
-Platform adapters enqueue :class:`~forest.integrations.types.IngestPayload`; this module
+Platform adapters fire :class:`~forest.integrations.types.IngestPayload`; this module
 performs LLM routing (OpenRouter), path normalization, and persistence.
 """
 
@@ -78,7 +78,7 @@ def _external_key(source_url: str, message_id: str) -> str:
 async def ingest_single_file(
     session: AsyncSession,
     *,
-    guild_id: str,
+    workspace_key: str,
     llm: LLMService,
     payload: IngestPayload,
     cue_title: str,
@@ -91,8 +91,8 @@ async def ingest_single_file(
     ----------
     session : AsyncSession
         Session scoped to this cue's transaction.
-    guild_id : str
-        Discord guild id (matches ``payload.workspace_key`` in MVP).
+    workspace_key : str
+        External workspace id (matches ``payload.workspace_key``).
     llm : LLMService
         Client for chat routing and embeddings.
     payload : IngestPayload
@@ -111,13 +111,13 @@ async def ingest_single_file(
     """
     ws_repo = WorkspaceRepository(session)
     files = FileNodeRepository(session)
-    ws = await ws_repo.get_by_platform_ids(payload.platform, guild_id)
+    ws = await ws_repo.get_by_platform_ids(payload.platform, workspace_key)
     if ws is None or not ws.is_initialized:
         _log.debug(
             "ingest skipped: workspace missing or not initialized",
             extra={
                 "operation": "ingest",
-                "guild_id": guild_id,
+                "workspace_key": workspace_key,
             },
         )
         return
@@ -142,7 +142,7 @@ async def ingest_single_file(
             extra={
                 "operation": "ingest",
                 "workspace_id": str(ws.id),
-                "guild_id": guild_id,
+                "workspace_key": workspace_key,
                 "llm_backend": "openrouter",
             },
         )
@@ -211,7 +211,7 @@ async def process_ingest(payload: IngestPayload, llm: LLMService) -> None:
     Parameters
     ----------
     payload : IngestPayload
-        Inbound work unit from the Discord adapter.
+        Inbound work unit from the platform adapter.
     llm : LLMService
         OpenRouter-backed LLM client.
 
@@ -222,7 +222,7 @@ async def process_ingest(payload: IngestPayload, llm: LLMService) -> None:
     """
     from forest.db.session import session_scope
 
-    guild_id = payload.workspace_key
+    workspace_key = payload.workspace_key
     cues: list[tuple[str, str]] = []
     for att in payload.attachments:
         cues.append((att.filename or "attachment", att.url))
@@ -234,7 +234,7 @@ async def process_ingest(payload: IngestPayload, llm: LLMService) -> None:
         async with session_scope() as session:
             await ingest_single_file(
                 session,
-                guild_id=guild_id,
+                workspace_key=workspace_key,
                 llm=llm,
                 payload=payload,
                 cue_title=title,

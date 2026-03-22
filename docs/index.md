@@ -1,17 +1,17 @@
-# Forest documentation
+# `森 forest` documentation
 
-Forest passively captures links and file attachments from Discord, uses an LLM (via OpenRouter) to place each item in a **virtual folder tree**, stores metadata and embeddings in PostgreSQL (pgvector), and exposes a simple slash command to browse captured files.
+`森 forest` passively captures links and file attachments from Slack, uses an LLM (via OpenRouter) to place each item in a **virtual folder tree**, stores metadata and embeddings in PostgreSQL (pgvector), and exposes simple mention commands (`@forest`) to browse captured files.
 
-This documentation is maintained as Markdown in the repository. A future standalone docs site (for example branded as Forest docs or `forest.docs`) can point at these same sources with MkDocs, Sphinx, or another static generator.
+This documentation is maintained as Markdown in the repository. A future standalone docs site can point at these same sources with MkDocs, Sphinx, or another static generator.
 
 ## Contents
 
 1. [Purpose](purpose.md) — product intent, scope, and non-goals  
-2. [Usage](usage.md) — Discord commands, permissions, and operator workflow  
-3. [Discord setup](discord-setup.md) — application, bot token, intents, invite URL  
-4. [Architecture](architecture.md) — components, boundaries, and runtime model  
-5. [Installation](installation.md) — environment, Poetry, database, migrations  
-6. [Startup and operations](startup.md) — running the process, health endpoints, logging  
+2. [Usage](usage.md) — Slack commands, permissions, and operator workflow  
+3. [Architecture](architecture.md) — components, boundaries, and runtime model  
+4. [Slack app setup](slack-app-setup.md) — create the app, scopes, tokens, event subscriptions  
+5. [Installation](installation.md) — local setup, database, migrations, running, and health endpoints  
+6. [Deployment](deployment.md) — remote self-hosting on AWS (ECS / App Runner) and GCP (Cloud Run)  
 7. [Extensions](extensions.md) — new chat platforms and post-MVP features  
 8. [FAQ](faq.md) — troubleshooting and design choices  
 
