@@ -4,21 +4,21 @@
 
 The MVP standardizes on one OpenAI-compatible HTTP surface with a single API key and model slugs. Vendor-specific SDKs are avoided so routing and policy stay centralized. You can still target many models **through** OpenRouter.
 
-## Why pgvector if search is not in MVP?
+## Why pgvector if search is not in scope yet?
 
-Embeddings are computed and stored on ingest so **semantic search can ship later without backfilling** every historical file, unless you explicitly choose a summary-only mode elsewhere.
+Embeddings are computed and stored on ingest so **semantic search can ship later without backfilling** every historical file.
 
-## Why one process for HTTP and Discord?
+## Why one HTTP process?
 
-Simplicity: shared memory for the ingest queue, one config load, one database pool. Horizontal scaling would require a durable queue or out-of-process workers (out of MVP scope).
+Simplicity: shared memory for background tasks, one config load, one database pool. Slack webhooks + health routes all run in a single Uvicorn process.
 
-## What happens if onboarding fails on guild join?
+## What happens if onboarding fails?
 
-Auto-onboarding is best-effort and logged. An admin can run **`/forest init`** after fixing permissions, OpenRouter, or database issues.
+The error is logged and the result is posted back to the Slack channel. An admin can run **`@forest init`** again after fixing permissions, OpenRouter, or database issues.
 
-## Why a markdown list for `/forest files` instead of an interactive tree UI?
+## Why a text list for `@forest show` instead of an interactive tree UI?
 
-`/forest files` renders a **nested bullet list** (Markdown: indented `-` lines, bold folder names, `[filename](url)` for files) so Discord can **linkify** URLs. It stays **paginated** by line for message limits. A clickable hierarchical navigator is out of MVP scope.
+`@forest show` renders a **nested bullet list** (indented `-` lines, bold folder names, `<url|name>` for files) using Slack mrkdwn. A clickable hierarchical navigator is out of scope for now.
 
 ## Can I run without Docker?
 
@@ -40,7 +40,7 @@ Ingest uses an **`external_key`** (hash of source URL and message id) with a par
 
 ## Where do I add business logic that must stay platform-independent?
 
-**`forest/services/`**, operating on **`forest/integrations/`** types and repositories — not inside `platforms/discord`.
+**`forest/services/`**, operating on **`forest/integrations/`** types and repositories — not inside `platforms/slack`.
 
 ## How do tests run without a real database?
 

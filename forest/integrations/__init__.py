@@ -1,5 +1,5 @@
 """
-Platform-neutral DTOs (no ``discord.py`` types).
+Platform-neutral DTOs (no SDK types).
 
 Adapters map native events into these models before calling core services.
 """

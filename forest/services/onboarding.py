@@ -1,7 +1,7 @@
 """
 Phase 0 onboarding: LLM-proposed folder tree, persisted as directory ``FileNode`` rows.
 
-Triggered on guild join and via the ``/forest init`` slash command (admin).
+Triggered via the ``@forest init`` mention command (admin).
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ async def run_onboarding_for_workspace(
     platform: str,
     platform_workspace_id: str,
     text_channel_names: list[str],
-    guild_name: str | None,
+    workspace_name: str | None,
     llm: LLMService,
     force: bool = False,
     channel_histories: list[dict[str, Any]] | None = None,
@@ -77,15 +77,15 @@ async def run_onboarding_for_workspace(
     session : AsyncSession
         Active session; commit/rollback is the caller's responsibility (e.g. ``session_scope``).
     platform : str
-        Platform key (``"discord"`` in MVP).
+        Platform key (``"slack"``).
     platform_workspace_id : str
-        External workspace id (guild id string).
+        External workspace id (Slack team_id string).
     text_channel_names : list of str
         Channel (and thread) labels hinting folder topics for the LLM.
     channel_histories : list of dict, optional
-        Per-channel message excerpts (e.g. from Discord history scan). When omitted,
+        Per-channel message excerpts (e.g. from Slack history scan). When omitted,
         the LLM uses only ``text_channel_names``.
-    guild_name : str or None
+    workspace_name : str or None
         Optional server display name for prompts.
     llm : LLMService
         OpenRouter-backed client.
@@ -119,14 +119,14 @@ async def run_onboarding_for_workspace(
             extra={
                 "operation": "onboarding",
                 "workspace_id": str(ws.id),
-                "guild_id": platform_workspace_id,
+                "workspace_key": platform_workspace_id,
             },
         )
         return False
 
     tree = await llm.generate_base_tree(
         text_channel_names,
-        guild_name,
+        workspace_name,
         channel_histories=channel_histories,
     )
     await files.ensure_root(ws.id)
@@ -137,7 +137,7 @@ async def run_onboarding_for_workspace(
         extra={
             "operation": "onboarding_refresh" if force and already_initialized else "onboarding",
             "workspace_id": str(ws.id),
-            "guild_id": platform_workspace_id,
+            "workspace_key": platform_workspace_id,
             "force": force,
         },
     )

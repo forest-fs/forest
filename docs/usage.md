@@ -1,52 +1,48 @@
 # Usage
 
-For creating the Discord application and obtaining **`DISCORD_TOKEN`**, see [Discord setup](discord-setup.md).
+## Slack app setup
 
-## Discord: end user and admin flows
+For a full step-by-step walkthrough (creating the app, scopes, tokens, and event subscriptions), see [Slack app setup](slack-app-setup.md).
 
-### Permissions and intents
+**Short version:**
 
-In the Discord Developer Portal, enable **Message Content Intent** and the guild/message intents your deployment needs.
+1. Create an app at [api.slack.com/apps](https://api.slack.com/apps) and add bot scopes: `app_mentions:read`, `channels:history`, `channels:read`, `chat:write`, `files:read`.
+2. **Event Subscriptions**: enable events, set Request URL `https://<host>/slack/events`, subscribe to `app_mention` and `message.channels`.
+3. Install to your workspace; copy **Bot User OAuth Token** → `SLACK_BOT_TOKEN` and **Signing Secret** → `SLACK_SIGNING_SECRET` into `.env`.
 
-Bot permissions should include, at minimum:
+## Mention commands
 
-- Read messages and message history (to build context and detect content).
-- Embed links (for readable slash responses).
-- Use slash commands.
+Mention `@Forest` in any channel the bot has joined to run a command.
 
-### Slash commands
-
-| Command | Who | Behavior |
+| Mention | Who | Behavior |
 |---------|-----|----------|
-| `/forest help` | Any member | Ephemeral summary of commands, ingest behavior, and admin vs user actions. |
-| `/forest init` | Members with **Manage Server** | Scans **all readable** text channels and **active forum threads** (full message history via the API), builds capped transcripts, then runs onboarding: upserts a `Workspace`, LLM folder tree, directory `FileNode` rows, `is_initialized`. Skips if already initialized (use `update` to re-merge). Large servers rely on **char budgets** (see env below). |
-| `/forest update` | Members with **Manage Server** | **After** init: same history scan + LLM again; **merges** new folder paths (`ensure_path`). Does not delete nodes or re-enqueue ingest for old messages; re-send attachments/links if you need those stored again. |
-| `/forest files` | Any member allowed by your server policy | Shows **file** nodes as a **nested markdown bullet list** (bold `**/folder/**`, `[filename](url)` on files), paginated by line (`page` argument). No interactive picker in MVP. |
+| `@forest help` | Any member | Overview of commands, ingest behavior, and admin vs user actions. |
+| `@forest init` | Workspace admins | Scans all readable channels (full message history, subject to budget settings), builds capped transcripts, then runs onboarding: upserts a `Workspace`, LLM folder tree, directory `FileNode` rows, `is_initialized`. Posts result to the channel when complete. |
+| `@forest update` | Workspace admins | After init: same history scan + LLM again; merges new folder paths. Does not delete nodes or replay ingest for old messages. |
+| `@forest show` | Any member | Shows file nodes as a nested list with Slack mrkdwn links. |
 
-On **guild join**, the bot attempts the same onboarding as `/forest init` (best effort; failures are logged).
+## Passive ingest
 
-### Passive ingest
+Human messages in channels where the bot is a member that contain **attachments** or **HTTP(S) URLs** trigger ingest:
 
-Human messages (non-bot) in guild text channels that contain **attachments** or **HTTP(S) URLs** in the body may enqueue an ingest job:
-
-- Prior channel messages are pulled for **context** (subject to permissions).
+- Recent channel messages are pulled for **context** (best-effort).
 - Each attachment and each distinct URL can become a separate file row after routing and embedding.
 
-If the workspace is not initialized yet, ingest is skipped until `/forest init` (or successful auto-onboarding) completes.
+If the workspace is not initialized yet, ingest is skipped until `@forest init` completes.
 
 ## Configuration surface (high level)
 
-Operators set environment variables (see [Installation](installation.md) and `.env.example`):
+Operators set environment variables (see `.env.example`):
 
 - Database URL (async SQLAlchemy).
-- Discord token; optional dev guild id for faster slash sync.
+- Slack bot token and signing secret.
 - OpenRouter API key, base URL, optional referer/title headers.
 - Chat and embedding **model ids** (slugs on OpenRouter).
-- **Onboarding history budgets** (optional): `FOREST_ONBOARDING_HISTORY_PER_CHANNEL_CHARS`, `FOREST_ONBOARDING_HISTORY_TOTAL_CHARS`, `FOREST_ONBOARDING_HISTORY_OLDEST_FIRST` — cap how much message text is passed to the LLM per channel and in total (defaults are set in `config.py`). The bot still **iterates** every message until the per-channel budget is filled (newest-first by default).
+- **Onboarding history budgets** (optional): `FOREST_ONBOARDING_HISTORY_PER_CHANNEL_CHARS`, `FOREST_ONBOARDING_HISTORY_TOTAL_CHARS`, `FOREST_ONBOARDING_HISTORY_OLDEST_FIRST` — cap how much message text is passed to the LLM per channel and in total (defaults are set in `config.py`).
 
 **Embedding dimension** in the database (currently 3072 in the schema; see migrations) must match the chosen embedding model output.
 
 ## Operational cautions
 
-- **Rate limits**: Discord API and OpenRouter; the bot uses a bounded queue and per-guild semaphores to reduce bursts.
+- **Rate limits**: Slack API and OpenRouter; the app uses per-workspace semaphores to reduce bursts.
 - **Secrets**: never commit `.env` or paste tokens into logs at INFO level.

@@ -35,9 +35,9 @@ class WorkspaceRepository:
         Parameters
         ----------
         platform : str
-            Platform key, e.g. ``"discord"``.
+            Platform key, e.g. ``"slack"``.
         platform_workspace_id : str
-            External workspace id (guild id string in the MVP).
+            External workspace id (Slack team_id string).
 
         Returns
         -------
