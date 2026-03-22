@@ -5,7 +5,7 @@
 Naturally, teams will share files from different platforms and discuss them in chat — forest listens and organizes.
 
 <p align="center">
-  <img src="public/forest-flow.png" alt="Teams create cross-platform files and discuss them in Discord, Slack, or Teams — forest connects to those conversations and builds a knowledge layer." width="700" style="border-radius: 12px;" />
+  <img src="public/forest-flow.png" alt="Teams create cross-platform files and discuss them in Discord, Slack, or Teams — forest connects to those conversations and builds a knowledge layer." />
 </p>
 
 Say _sayionara_ to organizing these yourself (or even worse, having someone else organize them!); just let your teammates create/store them in their platforms of preference, and let `森 forest` manage the rest.
@@ -16,14 +16,14 @@ Say _sayionara_ to organizing these yourself (or even worse, having someone else
 Browse your workspace tree with `/forest show`.
 
 <p align="center">
-  <img src="public/forest-show.png" alt="/forest find lets you search by natural language — ask for 'ui mockup Tim and I discussed' and get the file along with the conversation context." width="700" style="border-radius: 12px;" />
+  <img src="public/forest-show.png" alt="/forest find lets you search by natural language — ask for 'ui mockup Tim and I discussed' and get the file along with the conversation context." width="700" />
 </p>
 
 Find any file by context with `/forest find`.
 
 
 <p align="center">
-  <img src="public/forest-find.png" alt="/forest show returns a virtual file tree organized by topic — engineering, design, fundraising — pulling files from GitHub, Figma, Notion, and more." width="700" style="border-radius: 12px;" />
+  <img src="public/forest-find.png" alt="/forest show returns a virtual file tree organized by topic — engineering, design, fundraising — pulling files from GitHub, Figma, Notion, and more." width="700" />
 </p>
 
 
