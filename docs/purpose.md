@@ -1,31 +1,25 @@
 # Purpose
 
-## What Forest is
+## What `森 forest` is
 
-Forest is a **virtual filesystem** backed by a database, not by blobs on disk. It records:
+`森 forest` is a cross platform **virtual filesystem** created, designed and managed by an LLM, derived on your company chats. Every file in the system is just a link to its original location in the platform of origin.
 
-- Where a shared link or attachment *belongs* in a folder tree (LLM-suggested path).
-- **Pointers** (URLs), **message jump links**, **short summaries**, and **embeddings** for future semantic search.
-
-The current version targets **Slack** via the Events API and bot mention commands.
 
 ## Problems it addresses
 
 - **Serendipitous sharing** in fast-moving channels buries important links and files.
-- **Manual filing** does not scale; Forest automates placement using context and an existing directory scaffold.
-- **Search later**: vectors are stored on ingest so enabling similarity search later does not require a full backfill (see [Extensions](extensions.md)).
+- **Manual filing** does not scale; `森 forest` automates placement using context and an existing directory scaffold.
+- **cross-platform mess**: teams will scatter their company knowledge across different platforms that don't talk to each other; `森 forest` is a lightweight tree that connects it all together.
 
-## Scope
+## Scope & Future Work
 
-In scope:
+Currently supported:
 
-- Slack Events API passive ingest (attachments + HTTP(S) URLs).
-- Onboarding: seed directory tree from channel names and history (LLM) via `@forest init`.
-- Browse: `@forest show` as a nested list with Slack mrkdwn links.
-- OpenRouter-only LLM access (OpenAI-compatible HTTP).
-- PostgreSQL with **pgvector**, FastAPI **healthz** / **ready**, stdlib logging.
+- `森 forest` only supports Slack for now, but future chat applications will be supported if there's enough interest.
+- On initialization, `森 forest` scans all conversations and files and builds an initial filesystem, no matter how old or big the history is.
+- By using OpenRouter, `森 forest` lets _you_ provide your LLM of choice to work with.
 
-Explicitly out of scope (may be documented as future work):
+Future work:
 
 - Semantic search UI (`@forest find`) and ANN index tuning.
 - Full telemetry (metrics, tracing, `/metrics`).
@@ -33,6 +27,6 @@ Explicitly out of scope (may be documented as future work):
 
 ## Who this documentation is for
 
-- **Operators**: install, configure, run, and observe the service.
+- **Developers of all kinds wishing to optimize their companys time**: install, configure, run, and observe the service.
 - **Contributors**: understand boundaries between `platforms/`, `integrations/`, and `services/`.
 - **Future doc site maintainers**: same Markdown can feed MkDocs/Sphinx.

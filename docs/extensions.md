@@ -1,6 +1,6 @@
 # Extensions
 
-This section describes how Forest is shaped for **future work** without requiring rewrites of core logic.
+This section describes how `forest` is shaped for **future work** without requiring rewrites of core logic.
 
 ## New chat platforms
 
@@ -37,4 +37,4 @@ New features should extend **`Settings`** via `pydantic-settings`, document vari
 
 ## Documentation site (`forest.docs`)
 
-The Markdown under `docs/` is written to be ingested by a static site generator later (MkDocs, Sphinx with MyST, etc.). See [docs/README.md](README.md) for maintainer notes on wiring a build.
+The Markdown under `docs/` is written to be ingested by a static site generator later (MkDocs, Sphinx with MyST, etc.). See [docs/index.md](index.md) for the current table of contents.
