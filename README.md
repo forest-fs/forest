@@ -103,6 +103,12 @@ For DB integration tests, set `FOREST_RUN_DB_INTEGRATION=1` with Postgres runnin
 
 Longer-form docs (purpose, architecture, installation, LLM setup, FAQ) live under [docs/](docs/index.md).
 
+## License
+
+`森 forest` is released under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
+
+This means you are free to use, modify, and self-host it — but if you distribute or run it as a network service, you must release your modifications under the same license.
+
 ## TODOs
 
 - Semantic search (`@forest find`) and pgvector ANN tuning (repository search, query embeddings, ANN index).
